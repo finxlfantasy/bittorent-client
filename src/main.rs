@@ -32,13 +32,30 @@ fn decode_bencoded_value(encoded_value: &str) -> Decoded {
     } else if encoded_value.starts_with('l') {
         // l5:helloi52ee  -> l5:helloi52ee ["hello", 52] 
         let mut list = Vec::new();
-        let mut index =1;
+        let mut index = 1;
         while encoded_value.chars().nth(index).unwrap() != 'e' {
             let decoded_value = decode_bencoded_value(&encoded_value[index..]);
             list.push(decoded_value.value);
             index += decoded_value.length;
         }
-    Decoded { value: serde_json::Value::Array(list), length: index + 1, }
+
+    Decoded { 
+        value: serde_json::Value::Array(list), 
+        length: index + 1, 
+    } 
+    } else if encoded_value.starts_with('d') {
+        // d3:foo3:bar5:helloi52ee  -> {"hello": 52, "foo":"bar"} 
+        let map = serde_json::Map::new();
+        let mut index = 1;
+        while encoded_value.chars().nth(index).unwrap() != 'e' {
+            let decoded_value = decode_bencoded_value(&encoded_value[index..]);
+            let decoded_key = decode_bencoded_value(encoded_value);
+            index += decoded_value.length + decoded_key.length;
+        }
+        Decoded {
+            value: serde_json::Value::Object(map),
+            length : index + 1,
+        }
     } else {
         panic!("Unhandled encoded value: {}", encoded_value)
     }
