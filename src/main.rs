@@ -14,6 +14,12 @@ fn decode_bencoded_value(encoded_value: &str) -> serde_json::Value {
         let number = number_string.parse::<i64>().unwrap();
         let string = &encoded_value[colon_index + 1..colon_index + 1 + number as usize];
         return serde_json::Value::String(string.to_string());
+    } else if encoded_value.chars().next().unwrap() == 'i' {
+        // Example: "5:hello" -> "hello"
+        let e_index = encoded_value.find('e').unwrap();
+        let number_string = &encoded_value[1..e_index];
+        let number = number_string.parse::<i64>().unwrap();
+        return serde_json::Value::Number(serde_json::Number::from(number));
     } else {
         panic!("Unhandled encoded value: {}", encoded_value)
     }
@@ -32,6 +38,6 @@ fn main() {
         let decoded_value = decode_bencoded_value(encoded_value);
         println!("{}", decoded_value.to_string());
     } else {
-        println!("unknown command: {}", args[1])
+        println!("unknown command: {}", args[1]) 
     }
 }
