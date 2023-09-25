@@ -45,7 +45,7 @@ fn decode_bencoded_value(encoded_value: &str) -> Decoded {
     } 
     } else if encoded_value.starts_with('d') {
         // d3:foo3:bar5:helloi52ee  -> {"hello": 52, "foo":"bar"} 
-        let map = serde_json::Map::new();
+        let mut map = serde_json::Map::new();
         let mut index = 1;
         while encoded_value.chars().nth(index).unwrap() != 'e' {
             let encoded_value = &encoded_value[index..];
