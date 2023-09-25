@@ -51,6 +51,10 @@ fn decode_bencoded_value(encoded_value: &str) -> Decoded {
             let encoded_value = &encoded_value[index..];
             let decoded_value = decode_bencoded_value(&encoded_value[index..]);
             let decoded_key = decode_bencoded_value(encoded_value);
+            map.insert(
+                decoded_key.value.as_str().unwrap().to_string(),
+                decoded_value.value,
+            );
             index += decoded_value.length + decoded_key.length;
         }
         Decoded {
