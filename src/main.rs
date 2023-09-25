@@ -49,8 +49,8 @@ fn decode_bencoded_value(encoded_value: &str) -> Decoded {
         let mut index = 1;
         while encoded_value.chars().nth(index).unwrap() != 'e' {
             let encoded_value = &encoded_value[index..];
-            let decoded_value = decode_bencoded_value(&encoded_value[index..]);
             let decoded_key = decode_bencoded_value(encoded_value);
+            let decoded_value = decode_bencoded_value(&encoded_value[decoded_key.length..]);
             map.insert(
                 decoded_key.value.as_str().unwrap().to_string(),
                 decoded_value.value,
