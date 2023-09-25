@@ -48,6 +48,7 @@ fn decode_bencoded_value(encoded_value: &str) -> Decoded {
         let map = serde_json::Map::new();
         let mut index = 1;
         while encoded_value.chars().nth(index).unwrap() != 'e' {
+            let encoded_value = &encoded_value[index..];
             let decoded_value = decode_bencoded_value(&encoded_value[index..]);
             let decoded_key = decode_bencoded_value(encoded_value);
             index += decoded_value.length + decoded_key.length;
