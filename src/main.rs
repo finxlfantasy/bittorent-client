@@ -7,11 +7,11 @@ use std::env;
 #[derive(Debug, Deserialize)]
 struct Torrent {
     announce: String,
-    info: TorrentInfo,
+    info: Info,
 }
 
 #[derive(Debug, Deserialize)]
-struct TorrentInfo {
+struct Info {
     length: usize,
     name: String,
     #[serde(rename = "piece length")]
@@ -31,8 +31,7 @@ fn to_json(value: &BencodeValue) -> JsonValue {
                 let val = to_json(val);
                 json_dict.insert(key, val);
             }
-            JsonValue::Object(json_dict)
-        }
+            JsonValue::Object(json_dict)}
     }
 }
 // Usage: your_bittorrent.sh decode "<encoded_value>"
