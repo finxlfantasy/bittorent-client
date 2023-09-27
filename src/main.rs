@@ -1,16 +1,16 @@
 use serde_bencode::{de, value::Value as BencodeValue};
 use serde_bytes::ByteBuf;
 use serde_json::{Map, Value as JsonValue};
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use std::env;
 
-#[derive(Debug, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct Torrent {
     announce: String,
     info: Info,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct Info {
     length: usize,
     name: String,
