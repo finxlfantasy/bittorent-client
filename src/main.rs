@@ -43,7 +43,7 @@ fn main() {
         let encoded_value = &args[2];
         let decoded_value: BencodeValue = de::from_str(encoded_value).unwrap();
         println!("{}", to_json(&decoded_value)); 
-    } else if command  == "TorrentInfo" {
+    } else if command  == "Info" {
         let torrent_file = &args[2];
         let file_buf = std::fs::read(torrent_file).unwrap();
         let torrent = de::from_bytes::<Torrent>(&file_buf).unwrap(); 
