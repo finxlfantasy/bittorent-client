@@ -40,7 +40,8 @@ fn to_json(value: &BencodeValue) -> JsonValue {
 fn info_hash(info: &Info) -> String {
     let mut hasher = Sha1::new();
     hasher.update(serde_bencode::to_bytes(&info).unwrap());
-    hex::encode(hasher.finalize())
+    sha1::encode(hasher.finalize())
+
 
 }
 // Usage: your_bittorrent.sh decode "<encoded_value>"
