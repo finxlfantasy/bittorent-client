@@ -43,9 +43,9 @@ fn main() {
         let encoded_value = &args[2];
         let decoded_value: BencodeValue = de::from_str(encoded_value).unwrap();
         println!("{}", to_json(&decoded_value)); 
-    } else if command  == "Info" {
-        let file = &args[2];
-        let file_buf = std::fs::read(file).unwrap();
+    } else if command  == "info" {
+        let file_name = &args[2];
+        let file_buf = std::fs::read(file_name).unwrap();
         let torrent = de::from_bytes::<Torrent>(&file_buf).unwrap(); 
 
         println!("Tracker URL: {}", torrent.announce);
