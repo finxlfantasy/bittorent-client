@@ -61,7 +61,7 @@ fn main() {
     
         println!("Tracker URL: {}", torrent.announce);
         println!("Length: {}", torrent.info.length);
-        println!("Info_hash: {}", info_hash(&torrent.info));
+        println!("Info Hash: {}", info_hash(&torrent.info));
     } else {
         println!("unknown command: {}", args[1]) 
     }
