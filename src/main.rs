@@ -100,38 +100,54 @@ fn main() {
 
     if command == "decode" {
         let encoded_value = &args[2];
-        let decoded_value: BencodeValue = de::from_str(encoded_value).unwrap();
-        println!("{}", to_json(&decoded_value)); 
-    } else if command  == "info" {
+        let decoded_value: Result<BencodeValue, _> = de::from_str(encoded_value);
+        match decoded_value {
+            Ok(value) => println!("{}", to_json(&value)),
+            Err(err) => println!("Error decoding: {:?}", err),
+        }
+    } else if command == "info" {
         let file_name = &args[2];
-        let file_buf = std::fs::read(file_name).unwrap();
-        let torrent = de::from_bytes::<Torrent>(&file_buf).unwrap(); 
+        let file_buf = std::fs::read(file_name);
+        match file_buf {
+            Ok(buf) => {
+                let torrent: Result<Torrent, _> = de::from_bytes(&buf);
+                match torrent {
+                    Ok(torrent) => {
+                        let tracker_url = &torrent.announce;
+                        let info_hash = info_hash(&torrent.info);
 
-        let tracker_url = &torrent.announce;
-        let info_hash = info_hash(&torrent.info);
+                        println!("Tracker URL: {}", torrent.announce);
+                        println!("Length: {}", torrent.info.length);
+                        println!("Info Hash: {}", info_hash);
+                        println!("Piece Length: {}", torrent.info.pieces_length);
 
-        println!("Tracker URL: {}", torrent.announce);
-        println!("Length: {}", torrent.info.length);
-        println!("Info Hash: {}", info_hash);
-        println!("Piece Length: {}", torrent.info.pieces_length);
+                        println!("Piece Hash: ");
+                        for chunk in torrent.info.pieces.chunks(20) {
+                            let hash_hex: String = hex::encode(chunk);
+                            println!("{}", hash_hex);
+                        }
 
-        println!("Piece Hash: ");
-        for chunk in torrent.info.pieces.chunks(20) {
-            let hash_hex: String = hex::encode(chunk);
-            println!("{}", hash_hex);
+                        if let Err(err) = make_tracker_request(tracker_url, &info_hash, peer_id, total_length) {
+                            println!("Error making tracker request: {:?}", err);
+                        }
+                    }
+                    Err(err) => println!("Error parsing torrent: {:?}", err),
+                }
+            }
+            Err(err) => println!("Error reading file: {:?}", err),
         }
+    } else if command == "peers" {
+        if args.len() < 4 {
+            println!("Usage: {} peers <tracker_url> <info_hash>", args[0]);
+        } else {
+            let tracker_url = &args[2];
+            let info_hash = &args[3];
 
-        if let Err(err) = make_tracker_request(tracker_url, &info_hash, peer_id, total_length) {
-            println!("Error: {:?}", err);
-        }
-        } else if command == "peers" { // Handle the "peers" command
-        let tracker_url = &args[2]; // The tracker URL is passed as the second argument
-        let info_hash = &args[3];   // The info hash is passed as the third argument
-
-        if let Err(err) = make_tracker_request(tracker_url, info_hash, peer_id, total_length) {
-            println!("Error: {:?}", err);
+            if let Err(err) = make_tracker_request(tracker_url, info_hash, peer_id, total_length) {
+                println!("Error making tracker request: {:?}", err);
+            }
         }
     } else {
-        println!("unknown command: {}", args[1]) 
+        println!("unknown command: {}", args[1])
     }
 }
