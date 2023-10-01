@@ -44,7 +44,6 @@ fn info_hash(info: &Info) -> String {
     hex::encode(hasher.finalize())
 }
 
-
 // Usage: your_bittorrent.sh decode "<encoded_value>"
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -62,6 +61,13 @@ fn main() {
         println!("Tracker URL: {}", torrent.announce);
         println!("Length: {}", torrent.info.length);
         println!("Info Hash: {}", info_hash(&torrent.info));
+        println!("Piece Length: {}", torrent.info.pieces_length);
+
+        println!("Pieces Hash: ");
+        for chunk in torrent.info.pieces.chunks(20) {
+            let hash_hex: String = hex::encode(chunk);
+            println!("{}", hash_hex);
+        }
     } else {
         println!("unknown command: {}", args[1]) 
     }
