@@ -124,6 +124,13 @@ fn main() {
         if let Err(err) = make_tracker_request(tracker_url, &info_hash, peer_id, total_length) {
             println!("Error: {:?}", err);
         }
+        } else if command == "peers" { // Handle the "peers" command
+        let tracker_url = &args[2]; // The tracker URL is passed as the second argument
+        let info_hash = &args[3];   // The info hash is passed as the third argument
+
+        if let Err(err) = make_tracker_request(tracker_url, info_hash, peer_id, total_length) {
+            println!("Error: {:?}", err);
+        }
     } else {
         println!("unknown command: {}", args[1]) 
     }
