@@ -5,7 +5,8 @@ use serde::{Serialize, Deserialize};
 use std::env;
 use sha1::{Digest, Sha1};
 use hex;
-use url::form_urlencoded;
+use serde_urlencoded;
+use reqwest;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Torrent {
@@ -44,21 +45,38 @@ fn info_hash(info: &Info) -> String {
     hex::encode(hasher.finalize())
 }
 
-fn make_tracker_request(tracker_url: &str, info_hash: &str, peer_id: &str, total_length: usize) -> Result<(), reqwest::Error> {
-    let left = total_length.to_string();
+#[derive(Debug, Serialize, Deserialize)]
+struct QueryParams {
+    info_hash: String,
+    peer_id: String,
+    port: u16,
+    uploaded: u64,
+    downloaded: u64,
+    left: u64,
+    compact: u8,
+}
 
-    let mut params = form_urlencoded::Serializer::new(String::new());
-    params.append_pair("info_hash", info_hash);
-    params.append_pair("peer_id", peer_id);
-    params.append_pair("port", "6881");
-    params.append_pair("uploaded", "0");
-    params.append_pair("downloaded", "0");
-    params.append_pair("left", &left);
-    params.append_pair("compact", "1");
+fn make_tracker_request(tracker_url: &str, info_hash: &str, peer_id: &str, total_length: usize) -> Result<(), Box<dyn std::error::Error>> {
+    let left = total_length as u64;
 
-    let request_url =format!("{}?{}", tracker_url, params.finish());
+    let query_params = QueryParams {
+        info_hash: info_hash.to_string(),
+        peer_id: peer_id.to_string(),
+        port: 6681,
+        uploaded: 0,
+        downloaded: 0,
+        left,
+        compact: 1,
+    };
 
-    //Mak the GET request to the tracker
+    let query_string = match serde_urlencoded::to_string(&query_params) { 
+        Ok(query) => query,
+        Err(err) => return Err(Box::new(err)),
+    }; 
+
+    let request_url = format!("{}?{}", tracker_url, query_string);
+
+    //Make the GET request to the tracker
     let response= reqwest::blocking::get(&request_url)?;
 
     if response.status().is_success() {
@@ -70,6 +88,8 @@ fn make_tracker_request(tracker_url: &str, info_hash: &str, peer_id: &str, total
     Ok(())
 
 }
+
+
 // Usage: your_bittorrent.sh decode "<encoded_value>"
 fn main() {
     let args: Vec<String> = env::args().collect();
