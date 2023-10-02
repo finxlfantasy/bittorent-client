@@ -86,8 +86,29 @@ fn make_tracker_request(tracker_url: &str, info_hash: &str, peer_id: &str, total
         println!("Error: Request failed with status {:?}", response.status());
     }
     Ok(())
-
 }
+    fn parse_tracker_response(response_body: &[u8]) {
+        // Assuming that the response is in a specific format, you need to parse it here
+        // and extract the peer information (IP addresses and port numbers) to print.
+        // You should adapt this code to match the actual format of the tracker's response.
+        // For simplicity, I'll assume the response is a list of IP:Port pairs in a compact format.
+        
+    
+        let peer_count = response_body.len() / 6; // Each peer entry is 6 bytes (4 bytes for IP, 2 bytes for port)
+
+        for i in 0..peer_count {
+            let offset = i * 6;
+            let ip_bytes = &response_body[offset..offset + 4];
+            let port_bytes = &response_body[offset + 4..offset + 6];
+            let ip = format!("{}.{}.{}.{}", ip_bytes[0], ip_bytes[1], ip_bytes[2], ip_bytes[3]);
+            let port = u16::from_be_bytes([port_bytes[0], port_bytes[1]]);
+            println!("{}:{}", ip, port);
+        }
+    
+    }
+ 
+    
+
 
 
 // Usage: your_bittorrent.sh decode "<encoded_value>"
