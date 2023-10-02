@@ -100,11 +100,8 @@ fn main() {
 
     if command == "decode" {
         let encoded_value = &args[2];
-        let decoded_value: Result<BencodeValue, _> = de::from_str(encoded_value);
-        match decoded_value {
-            Ok(value) => println!("{}", to_json(&value)),
-            Err(err) => println!("Error decoding: {:?}", err),
-        }
+        let decoded_value: BencodeValue = de::from_str(encoded_value).unwrap();
+        println!("{}", to_json(&decoded_value)); 
     } else if command == "info" {
         let file_name = &args[2];
         let file_buf = std::fs::read(file_name);
